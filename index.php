@@ -12,10 +12,10 @@ require_once 'lib/lib.php';
 	<!-- <script src="js/popper.min.js"></script> -->
 
 	<!-- <script type="text/javascript" src="js/action.js"></script> -->
-	<!-- <script src="assets/js/bootstrap.min.js"></script> -->
 	<!-- <script type="text/javascript" src="js/jquery.js"></script> -->
 
 	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+	<script src="assets/js/bootstrap.min.js"></script>
 	<link rel="stylesheet" href="assets/css/bootstrap.min.css" />
 
 	<style type="text/css">
@@ -30,13 +30,12 @@ require_once 'lib/lib.php';
 		z-index: 9999;
 		background: url(assets/images/loading.gif) center no-repeat #fff;
 		opacity: 0.7;
-		/*background: url(assets/images/loading.gif) center no-repeat #fff;*/
 	}
 	</style>
 
 	<!-- <script type="text/javascript" src="http://code.jquery.com/jquery.js"></script> -->
 	<body>
-		<div xstyle="display:none" class="pageLoader"></div>
+		<div class="pageLoader"></div>
 		<br />
 
 		<div class="container">
@@ -60,16 +59,26 @@ require_once 'lib/lib.php';
 								<input type="text" class="form-control" id="no" name="no" placeholder="No Telpon" required/>
 							</div>
 						</div>
+
+
+						<?php
+							// $sql  = 'SELECT DISTINCT param2 FROM parameter WHERE nama="harga"';
+							// $sql  = 'SELECT DISTINCT param2 FROM parameter WHERE param1 IN ("harga","type")';
+							$sql  = 'SELECT param2, nama FROM parameter WHERE param1 = "type"';
+							$exe  = mysqli_query($con,$sql);
+							// var_dump($sql);
+						?>
 						<div class="form-group row">
 							<label for="harga" class="col-sm-2 col-form-label">Jenis</label>
 							<div class="col-sm-10">
 								<select onchange="hargacb(this.value);" class="form-control" id="jeniscombo" name="jeniscombo">
 									<option value="" selected> -- Pilih --</option>
 									<?php
-										$sql  = 'SELECT DISTINCT param2 FROM parameter WHERE nama="harga"';
-										$exe  = mysqli_query($con,$sql);
+										// $sql  = 'SELECT DISTINCT param2 FROM parameter WHERE nama="harga"';
+										// $exe  = mysqli_query($con,$sql);
 										while ($res=mysqli_fetch_assoc($exe)){
-											echo '<option value="'.$res['param2'].'">'.$res['param2'].'</option>';
+											// echo '<option value="'.$res['param2'].'">'.$res['param2'].'</option>';
+											echo '<option value="'.$res['param2'].'">'.$res['nama'].'</option>';
 										}
 									?>
 								</select>
@@ -108,6 +117,7 @@ require_once 'lib/lib.php';
 				$('.pageLoader').attr('style','display:none');
 			}, 700);
 		});
+		
 		function hargacb(jenis) {
 			$.ajax({
 				url:'action.php',
@@ -125,7 +135,8 @@ require_once 'lib/lib.php';
 						else{
 							opt+='<option value="">-- Pilih --</option>';
 							$.each(ret.fetch.data, function  (id,val) {
-								opt+='<option value="'+val.id_param+'">'+val.param1+'</option>';
+								// opt+='<option value="'+val.id_param+'">'+val.param1+'</option>';
+								opt+='<option value="'+val.id_param+'">'+val.nama+'</option>';
 							});
 						}$('#hargacombo').html(opt);
 					}, 700);
