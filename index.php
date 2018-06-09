@@ -105,8 +105,6 @@ require_once 'lib/lib.php';
 
 			<br />
 
-
-			
 		</div>
 		<br />
 	</body>
@@ -121,7 +119,12 @@ require_once 'lib/lib.php';
 		function hargacb(jenis) {
 			$.ajax({
 				url:'action.php',
-				data:'jenis='+jenis,
+				data:{
+					'mode':'comboharga',
+					'jenis':jenis
+				},
+				// 'jenis='+jenis,
+				// data:'jenis='+jenis,
 				type:'post',
 				dataType:'json',
 				beforeSend:function () {

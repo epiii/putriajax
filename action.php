@@ -2,43 +2,67 @@
 require_once 'lib/koneksi.php';
 require_once 'lib/lib.php';
 
-// pr(isset($_GET['mode']));
-if (!isset($_POST['jenis'])) {
-	$isRequest=false;
-}else{
-	$isRequest=true;
-	// $sql   = 'select id_param, param1 from parameter where nama="harga" and param2="'.$_POST['jenis'].'"';
-	// $sql   =   'select id_param, nama 
-	// 			from parameter 
-	// 			where 
-	// 				param1 in ("harga","type") and 
-	// 				param2="'.$_POST['jenis'].'"';
-	$sql=	'SELECT id_param,nama
-			FROM parameter 
-			WHERE 	param1 = "harga" AND
-					param2 = "'.$_POST['jenis'].'"
-			ORDER BY 
-				CAST(nama as DECIMAL) ASC';
-// pr($sql);
-	$exe   = mysqli_query($con,$sql);
-	$fetch = [];
 
-	if (!$exe) { // failed query 
-		$fetch['success']=false;
-	}else{ // success query 
-		$fetch['success']=true;
-		$fetch['total'] = mysqli_num_rows($exe);
+$isRequest=false;
+
+if (isset($_POST['mode'])) {
+	$isRequest=true;
+	$fetch = [];
+	$fetch['getparam']=false;
 	
-		// pr($res);
-		while ($res=mysqli_fetch_assoc($exe)){
-			$fetch['data'][]=array(
-				'id_param' =>$res['id_param'],
-				'nama'     =>'Rp. '.(number_format($res['nama'])),
-			);
-		}
+	switch ($_POST['mode']) {
+		case 'comboharga':
+			if (isset($_POST['jenis'])) {
+				$fetch['getparam']=true;
+				$sql= ' SELECT id_param,nama
+						FROM parameter 
+						WHERE 	param1 = "harga" AND
+								param2 = "'.$_POST['jenis'].'"
+						ORDER BY 
+							CAST(nama as DECIMAL) ASC';
+			// pr($sql);
+				$exe   = mysqli_query($con,$sql);
+
+				if (!$exe) { // failed query 
+					$fetch['queried'] = false;
+				}else{ // success query 
+					$fetch['queried'] = true;
+					$fetch['total']   = mysqli_num_rows($exe);
+				
+					// pr($res);
+					while ($res=mysqli_fetch_assoc($exe)){
+						$fetch['data'][]=array(
+							'id_param' =>$res['id_param'],
+							'nama'     =>'Rp. '.(number_format($res['nama'])),
+						);
+					}
+				}
+			}
+		break;
+
+		case 'create':
+			// code here
+		break;
+
+		case 'edit':
+			// code here
+		break;
+
+		case 'delete':
+			// code here
+		break;
+
+		case 'view':
+			// code here
+		break;
+
+		default:
+			// code here
+		break;
 	}
+
 }
-// pr($fetch);
+
 echo json_encode([
 	'request' =>$isRequest,
 	'fetch'   =>$fetch
