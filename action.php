@@ -7,41 +7,53 @@ $isRequest=false;
 
 if (isset($_POST['mode'])) {
 	$isRequest=true;
-	$fetch = [];
-	$fetch['getparam']=false;
+	$returns = [];
+	$returns['getparam']=false;
 	
 	switch ($_POST['mode']) {
 		case 'comboharga':
 			if (isset($_POST['jenis'])) {
-				$fetch['getparam']=true;
+				$returns['getparam']=true;
 				$sql= ' SELECT id_param,nama
 						FROM parameter 
 						WHERE 	param1 = "harga" AND
 								param2 = "'.$_POST['jenis'].'"
 						ORDER BY 
 							CAST(nama as DECIMAL) ASC';
-			// pr($sql);
 				$exe   = mysqli_query($con,$sql);
+			// pr($exe);
 
 				if (!$exe) { // failed query 
-					$fetch['queried'] = false;
+					$returns['queried'] = false;
 				}else{ // success query 
-					$fetch['queried'] = true;
-					$fetch['total']   = mysqli_num_rows($exe);
+					$returns['queried'] = true;
+					$returns['total']   = mysqli_num_rows($exe);
 				
 					// pr($res);
 					while ($res=mysqli_fetch_assoc($exe)){
-						$fetch['data'][]=array(
-							'id_param' =>$res['id_param'],
-							'nama'     =>'Rp. '.(number_format($res['nama'])),
+						$returns['data'][]=array(
+							'id_param'    =>$res['id_param'],
+							'harga_rp'    =>'Rp. '.(number_format($res['nama'])),
+							'harga_angka' =>$res['nama'],
 						);
 					}
 				}
 			}
 		break;
 
-		case 'create':
+		case 'view':
 			// code here
+		break;
+
+		case 'create':
+			$sql='INSERT INTO ajax SET 
+				nama   ="'.$_POST['nama'].'",
+				no_tlp ="'.$_POST['no_tlp'].'",
+				jenis  ="'.$_POST['jeniscombo'].'",
+				harga  ="'.$_POST['hargacombo'].'"';
+			$exe = mysqli_query($con,$sql);
+			// pr($sql);	
+			$returns['success']=!$exe?false:true;
 		break;
 
 		case 'edit':
@@ -49,10 +61,6 @@ if (isset($_POST['mode'])) {
 		break;
 
 		case 'delete':
-			// code here
-		break;
-
-		case 'view':
 			// code here
 		break;
 
@@ -65,7 +73,7 @@ if (isset($_POST['mode'])) {
 
 echo json_encode([
 	'request' =>$isRequest,
-	'fetch'   =>$fetch
+	'returns' =>$returns
 ]);
 
 ?>

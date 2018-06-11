@@ -45,8 +45,16 @@ require_once 'lib/lib.php';
 					<p>Data Parameter.</p>
 					
 					<br />
+					
+					<!-- <div id="alertinfo" class="alert alert-success alert-dismissible"> -->
+					<div style="display:none;" id="alert-div" class="alert alert-dismissible">
+					  <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+					  <span id="alert-msg">
+					  		<!-- message text here -->
+					  </span>
+					</div>
 
-					<form>
+					<form method="post" onsubmit="saveform();return false;">
 						<div class="form-group row">
 							<label for="nama" class="col-sm-2 col-form-label">Nama</label>
 							<div class="col-sm-10">
@@ -56,28 +64,22 @@ require_once 'lib/lib.php';
 						<div class="form-group row">
 							<label for="nama" class="col-sm-2 col-form-label">No Telpon</label>
 							<div class="col-sm-10">
-								<input type="text" class="form-control" id="no" name="no" placeholder="No Telpon" required/>
+								<!-- <input type="text"  class="form-control" id="no_tlp" name="no_tlp" placeholder="No Telpon" required/> -->
+								<input type="number" min="1" xmax="13" class="form-control" id="no_tlp" name="no_tlp" placeholder="No Telpon" required/>
 							</div>
 						</div>
 
-
 						<?php
-							// $sql  = 'SELECT DISTINCT param2 FROM parameter WHERE nama="harga"';
-							// $sql  = 'SELECT DISTINCT param2 FROM parameter WHERE param1 IN ("harga","type")';
 							$sql  = 'SELECT param2, nama FROM parameter WHERE param1 = "type"';
 							$exe  = mysqli_query($con,$sql);
-							// var_dump($sql);
 						?>
 						<div class="form-group row">
 							<label for="harga" class="col-sm-2 col-form-label">Jenis</label>
 							<div class="col-sm-10">
-								<select onchange="hargacb(this.value);" class="form-control" id="jeniscombo" name="jeniscombo">
+								<select required onchange="hargacb(this.value);" class="form-control" id="jeniscombo" name="jeniscombo">
 									<option value="" selected> -- Pilih --</option>
 									<?php
-										// $sql  = 'SELECT DISTINCT param2 FROM parameter WHERE nama="harga"';
-										// $exe  = mysqli_query($con,$sql);
 										while ($res=mysqli_fetch_assoc($exe)){
-											// echo '<option value="'.$res['param2'].'">'.$res['param2'].'</option>';
 											echo '<option value="'.$res['param2'].'">'.$res['nama'].'</option>';
 										}
 									?>
@@ -88,9 +90,8 @@ require_once 'lib/lib.php';
 							<label for="harga" class="col-sm-2 col-form-label">Harga</label>
 							<div class="col-sm-10">
 							<select required  class="form-control" id="hargacombo" name="hargacombo">
-									<option value="" selected> -- Pilih Jenis dahulu --</option>
-									
-								</select>
+								<option value="" selected> -- Pilih Jenis dahulu --</option>
+							</select>
 							</div>
 						</div>
 						<div class="form-group row">
@@ -122,10 +123,7 @@ require_once 'lib/lib.php';
 				data:{
 					'mode':'comboharga',
 					'jenis':jenis
-				},
-				// 'jenis='+jenis,
-				// data:'jenis='+jenis,
-				type:'post',
+				},type:'post',
 				dataType:'json',
 				beforeSend:function () {
 					$('.pageLoader').removeAttr('style');
@@ -137,18 +135,55 @@ require_once 'lib/lib.php';
 						if(ret.total==0) opt+='<option>-data kosong-</option>';
 						else{
 							opt+='<option value="">-- Pilih --</option>';
-							$.each(ret.fetch.data, function  (id,val) {
-								// opt+='<option value="'+val.id_param+'">'+val.param1+'</option>';
-								opt+='<option value="'+val.id_param+'">'+val.nama+'</option>';
+							$.each(ret.returns.data, function  (id,val) {
+								opt+='<option value="'+val.harga_angka+'">'+val.harga_rp+'</option>';
 							});
 						}$('#hargacombo').html(opt);
 					}, 700);
 				}, error : function (xhr, status, errorThrown) {
 					$('.pageLoader').attr('style','display:none');
-			        alert('error : ['+xhr.status+'] '+errorThrown);
+			        alertinfo('danger','error : ['+xhr.status+'] '+errorThrown);
 			    }
 			});
 		}
+
+		function saveform(){
+	        var urlx ='&mode=create';
+	        $.ajax({
+	            url:'action.php',
+	            cache:false,
+	            type:'post',
+	            dataType:'json',
+	            data:$('form').serialize()+urlx,
+				beforeSend:function () {
+					$('.pageLoader').removeAttr('style');
+				},success:function(dt){
+					setTimeout(function(){
+		            	console.log(dt.returns.success);
+						$('.pageLoader').attr('style','display:none');
+		                if(dt.returns.success==false){
+		                	alertinfo('danger','<strong>Gagal !</strong>  menyimpan data');
+		                }else{
+		                    resetform();
+		                	alertinfo('success','<strong>Berhasil !</strong>  menyimpan data');
+		                }
+		            },700);
+	            }
+	        });
+	    }
+
+	    function alertinfo(clr,msg) {
+	    	$('#alert-div').removeAttr('style');
+            $('#alert-msg').html(msg);
+            $('#alert-div').addClass('alert-'+clr);
+    	}
+
+	    function resetform() {
+	    	$('#nama').val('');
+	    	$('#no_tlp').val('');
+	    	$('#jeniscombo').val('');
+	    	$('#hargacombo').val('');
+	    }
 	</script>
 	
 </html>
